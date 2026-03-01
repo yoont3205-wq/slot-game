@@ -2,56 +2,120 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Telegram Slot Game</title>
+<title>Premium Slot</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 body {
-  background: #111;
-  color: white;
-  text-align: center;
-  font-family: Arial;
+  margin:0;
+  background: radial-gradient(circle at center, #1a1a1a, #000);
+  color:white;
+  font-family: 'Arial Black', sans-serif;
+  text-align:center;
 }
-.slot {
-  font-size: 60px;
-  margin: 20px;
+
+h1 {
+  margin-top:20px;
+  color:gold;
+  text-shadow:0 0 20px gold;
 }
+
+.slot-machine {
+  background:#111;
+  border:5px solid gold;
+  border-radius:20px;
+  padding:30px;
+  width:320px;
+  margin:40px auto;
+  box-shadow:0 0 40px rgba(255,215,0,0.6);
+}
+
+.reels {
+  font-size:60px;
+  letter-spacing:15px;
+  margin:20px 0;
+}
+
 button {
-  padding: 15px 30px;
-  font-size: 20px;
-  background: gold;
-  border: none;
-  border-radius: 10px;
+  background:linear-gradient(to bottom,#ffd700,#b8860b);
+  border:none;
+  padding:15px 40px;
+  font-size:22px;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 5px 0 #8b6508;
+}
+
+button:active {
+  transform:translateY(4px);
+  box-shadow:0 1px 0 #8b6508;
+}
+
+.result {
+  margin-top:20px;
+  font-size:20px;
 }
 </style>
 </head>
 <body>
 
-<h2>🎰 슬롯 게임</h2>
+<h1>🎰 PREMIUM SLOT</h1>
 
-<div class="slot" id="reel">🍒 🍋 🍉</div>
-<h3 id="result"></h3>
-
-<button onclick="spin()">SPIN</button>
+<div class="slot-machine">
+  <div class="reels" id="reel">🍒 🍋 🍉</div>
+  <button onclick="spin()">SPIN (-100P)</button>
+  <div class="result" id="result"></div>
+</div>
 
 <script>
-const symbols = ["🍒","🍋","🍉","⭐","💎","7️⃣"];
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-function spin() {
-  let a = symbols[Math.floor(Math.random()*symbols.length)];
-  let b = symbols[Math.floor(Math.random()*symbols.length)];
-  let c = symbols[Math.floor(Math.random()*symbols.length)];
+const SPIN_COST = 100;
 
-  document.getElementById("reel").innerText = `${a} ${b} ${c}`;
+const rewards = [
+  { name:"꽝", chance:0.60, win:0 },
+  { name:"소당첨", chance:0.25, win:200 },
+  { name:"중당첨", chance:0.10, win:500 },
+  { name:"대당첨", chance:0.04, win:1500 },
+  { name:"잭팟", chance:0.01, win:5000 }
+];
 
-  if (a === b && b === c) {
-    document.getElementById("result").innerText = "🎉 JACKPOT!";
-  } else if (a === b || b === c || a === c) {
-    document.getElementById("result").innerText = "✨ 2개 일치!";
-  } else {
-    document.getElementById("result").innerText = "❌ 꽝!";
+function getReward(){
+  const rand = Math.random();
+  let cumulative = 0;
+  for(let r of rewards){
+    cumulative += r.chance;
+    if(rand < cumulative) return r;
   }
+  return rewards[0];
+}
+
+function randomSymbol(){
+  const symbols=["🍒","🍋","🍉","⭐","💎","7️⃣"];
+  return symbols[Math.floor(Math.random()*symbols.length)];
+}
+
+function spin(){
+  const reward = getReward();
+
+  document.getElementById("reel").innerText =
+    randomSymbol()+" "+randomSymbol()+" "+randomSymbol();
+
+  document.getElementById("result").innerText =
+    reward.name + " | +" + reward.win + "P";
+
+  // 봇으로 데이터 전송
+  tg.sendData(JSON.stringify({
+    type:"slot_result",
+    cost:SPIN_COST,
+    win:reward.win
+  }));
 }
 </script>
 
 </body>
 </html>
+
+</body>
+</html>
+
