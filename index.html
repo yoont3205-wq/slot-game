@@ -1,121 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Premium Slot</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>랜덤번호 대포</title>
+
 <style>
 body {
-  margin:0;
-  background: radial-gradient(circle at center, #1a1a1a, #000);
-  color:white;
-  font-family: 'Arial Black', sans-serif;
-  text-align:center;
+    margin:0;
+    overflow:hidden;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(#6c8ed4, #87ceeb);
+    text-align:center;
 }
 
-h1 {
-  margin-top:20px;
-  color:gold;
-  text-shadow:0 0 20px gold;
+#numberBall {
+    position:absolute;
+    top:15%;
+    left:50%;
+    transform:translateX(-50%);
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:#00c400;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:90px;
+    color:gold;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
 }
 
-.slot-machine {
-  background:#111;
-  border:5px solid gold;
-  border-radius:20px;
-  padding:30px;
-  width:320px;
-  margin:40px auto;
-  box-shadow:0 0 40px rgba(255,215,0,0.6);
+#countText {
+    position:absolute;
+    top:42%;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:20px;
+    color:black;
 }
 
-.reels {
-  font-size:60px;
-  letter-spacing:15px;
-  margin:20px 0;
+#cannon {
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:150px;
+    height:220px;
+    background:orange;
+    border-radius:40px 40px 0 0;
+    box-shadow: inset -10px 0 rgba(0,0,0,0.2);
+}
+
+#fireBtn {
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    width:80px;
+    height:80px;
+    background:gold;
+    border-radius:50%;
+    border:5px solid #333;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+#fireBtn:active {
+    transform:translateX(-50%) scale(0.9);
+}
+
+#inputBox {
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(255,255,255,0.95);
+    padding:20px 30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+}
+
+input {
+    font-size:20px;
+    padding:5px;
+    width:80px;
 }
 
 button {
-  background:linear-gradient(to bottom,#ffd700,#b8860b);
-  border:none;
-  padding:15px 40px;
-  font-size:22px;
-  border-radius:12px;
-  cursor:pointer;
-  box-shadow:0 5px 0 #8b6508;
-}
-
-button:active {
-  transform:translateY(4px);
-  box-shadow:0 1px 0 #8b6508;
-}
-
-.result {
-  margin-top:20px;
-  font-size:20px;
+    font-size:18px;
+    padding:8px 15px;
+    margin-left:10px;
+    cursor:pointer;
 }
 </style>
 </head>
+
 <body>
 
-<h1>🎰 PREMIUM SLOT</h1>
+<div id="numberBall">?</div>
+<div id="countText"></div>
 
-<div class="slot-machine">
-  <div class="reels" id="reel">🍒 🍋 🍉</div>
-  <button onclick="spin()">SPIN (-100P)</button>
-  <div class="result" id="result"></div>
+<div id="inputBox">
+    마지막 번호가 몇 번인가요?
+    <br><br>
+    <input type="number" id="maxNumber" min="1">
+    번
+    <button onclick="startGame()">확인</button>
 </div>
 
+<div id="cannon"></div>
+<div id="fireBtn" onclick="fire()"></div>
+
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
 
-const SPIN_COST = 100;
+let max = 0;
+let count = 0;
 
-const rewards = [
-  { name:"꽝", chance:0.60, win:0 },
-  { name:"소당첨", chance:0.25, win:200 },
-  { name:"중당첨", chance:0.10, win:500 },
-  { name:"대당첨", chance:0.04, win:1500 },
-  { name:"잭팟", chance:0.01, win:5000 }
-];
-
-function getReward(){
-  const rand = Math.random();
-  let cumulative = 0;
-  for(let r of rewards){
-    cumulative += r.chance;
-    if(rand < cumulative) return r;
-  }
-  return rewards[0];
+function startGame() {
+    max = parseInt(document.getElementById("maxNumber").value);
+    if(!max || max < 1){
+        alert("1 이상 입력하세요");
+        return;
+    }
+    document.getElementById("inputBox").style.display="none";
+    document.getElementById("countText").innerText="1 번째";
 }
 
-function randomSymbol(){
-  const symbols=["🍒","🍋","🍉","⭐","💎","7️⃣"];
-  return symbols[Math.floor(Math.random()*symbols.length)];
+function fire(){
+    if(max === 0) return;
+
+    const ball = document.getElementById("numberBall");
+
+    // 발사 애니메이션
+    ball.style.transform="translateX(-50%) scale(1.2)";
+    setTimeout(()=>{
+        ball.style.transform="translateX(-50%) scale(1)";
+    },200);
+
+    let number = Math.floor(Math.random()*max)+1;
+    ball.innerText = number;
+
+    count++;
+    document.getElementById("countText").innerText=count+" 번째";
 }
 
-function spin(){
-  const reward = getReward();
-
-  document.getElementById("reel").innerText =
-    randomSymbol()+" "+randomSymbol()+" "+randomSymbol();
-
-  document.getElementById("result").innerText =
-    reward.name + " | +" + reward.win + "P";
-
-  // 봇으로 데이터 전송
-  tg.sendData(JSON.stringify({
-    type:"slot_result",
-    cost:SPIN_COST,
-    win:reward.win
-  }));
-}
 </script>
 
 </body>
 </html>
-
-</body>
-</html>
-
