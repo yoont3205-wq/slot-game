@@ -538,28 +538,35 @@
 
   // ✅ API 호출
   async function apiGetMe(){
-    if(!initData) return null; // 브라우저 테스트 대비
-    const res = await fetch(`${API_BASE}/api/me`, {
-      headers: { "X-Telegram-Init-Data": initData }
-    });
-    if(!res.ok) return null;
-    return await res.json(); // { user_id, points }
-  }
+  if(!initData) return null;
 
-  async function apiTx(delta){
-    if(!initData) return null;
-    const res = await fetch(`${API_BASE}/api/tx`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Telegram-Init-Data": initData
-      },
-      body: JSON.stringify({ delta })
-    });
-    if(!res.ok) return null;
-    return await res.json(); // { user_id, points, delta }
-  }
+  const res = await fetch(${API_BASE}/api/me, {
+    headers: {
+      "X-Telegram-Init-Data": initData,
+      "ngrok-skip-browser-warning": "1"
+    }
+  });
 
+  if(!res.ok) return null;
+  return await res.json();
+}
+
+async function apiTx(delta){
+  if(!initData) return null;
+
+  const res = await fetch(${API_BASE}/api/tx, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Telegram-Init-Data": initData,
+      "ngrok-skip-browser-warning": "1"
+    },
+    body: JSON.stringify({ delta })
+  });
+
+  if(!res.ok) return null;
+  return await res.json();
+}
   // ✅ 웹앱 시작 시: 개인 포인트 불러오기
   (async () => {
     try{
@@ -645,3 +652,4 @@
 </script>
 </body>
 </html>
+
