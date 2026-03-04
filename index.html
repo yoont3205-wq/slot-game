@@ -582,11 +582,20 @@
 
   // ✅ 게임 진행 + 결과 저장
   btns.forEach(btn => {
-    btn.addEventListener("click", async () => {
-      if(btn.disabled) return;
-      disable(true);
+  btn.addEventListener("click", async () => {
 
-      await countdown();
+    // ✅ 포인트 100 미만이면 게임 금지
+    if(points < 100){
+      resultEl.textContent = "최소 100P 이상 있어야 게임 가능합니다 ❌";
+      showBonus("LOW P", "lose");
+      showFlash("lose");
+      return;
+    }
+
+    if(btn.disabled) return;
+    disable(true);
+
+    await countdown();
 
       const me = btn.dataset.choice;
       const cpu = choices[(Math.random()*3) | 0];
@@ -635,3 +644,4 @@
 </script>
 </body>
 </html>
+
