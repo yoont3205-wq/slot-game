@@ -1,217 +1,571 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>랜덤번호 대포</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>가위바위보</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 
 <style>
-body {
+  :root{
+    --gold:#f5d37a;
+    --gold2:#caa74e;
+    --bg0:#000;
+    --bg1:#070709;
+    --line:rgba(255,255,255,.10);
+  }
+  *{ box-sizing:border-box; }
+
+  body{
     margin:0;
-    overflow:hidden;
-    font-family: 'Trebuchet MS', sans-serif;
-}
-
-/* 🌤 하늘 */
-.sky {
-    position:fixed;
-    width:100%;
-    height:100%;
-    background: linear-gradient(#4e73df, #87ceeb);
-    overflow:hidden;
-}
-
-/* ☁ 구름 */
-.cloud {
-    position:absolute;
-    background:white;
-    border-radius:50px;
-    opacity:0.8;
-    animation: moveCloud 60s linear infinite;
-}
-.cloud:before, .cloud:after {
-    content:'';
-    position:absolute;
-    background:white;
-    width:60px;
-    height:60px;
-    border-radius:50%;
-}
-.cloud:before { top:-30px; left:20px; }
-.cloud:after { top:-20px; left:60px; }
-
-@keyframes moveCloud {
-    from { left:-200px; }
-    to { left:110%; }
-}
-
-/* 🌳 언덕 */
-.hill1 {
-    position:absolute;
-    bottom:0;
-    width:120%;
-    height:250px;
-    background:#1e8f3e;
-    border-radius:50% 50% 0 0;
-    left:-10%;
-}
-.hill2 {
-    position:absolute;
-    bottom:0;
-    width:120%;
-    height:200px;
-    background:#32cd32;
-    border-radius:50% 50% 0 0;
-    left:-5%;
-}
-
-/* 🎯 숫자 공 */
-#numberBall {
-    position:absolute;
-    top:12%;
-    left:50%;
-    transform:translateX(-50%);
-    width:230px;
-    height:230px;
-    border-radius:50%;
-    background: radial-gradient(circle at 30% 30%, #00ff00, #008f00);
+    min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:95px;
-    color:gold;
-    font-weight:bold;
-    box-shadow:0 15px 40px rgba(0,0,0,0.5);
-    transition: all 0.3s ease;
-}
+    padding:16px;
+    color:var(--gold);
+    font-family:"Playfair Display", serif;
 
-/* 🎯 추첨 회차 */
-#countText {
-    position:absolute;
-    top:40%;
-    left:50%;
-    transform:translateX(-50%);
-    font-size:22px;
-    color:black;
-    font-weight:bold;
-}
+    background:
+      radial-gradient(1200px 700px at 20% 0%, rgba(255,215,0,.12), transparent 55%),
+      radial-gradient(1000px 700px at 90% 15%, rgba(176,70,255,.14), transparent 58%),
+      radial-gradient(900px 600px at 50% 110%, rgba(0,180,255,.10), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg0));
+  }
 
-/* 💥 대포 */
-#cannon {
-    position:absolute;
-    bottom:0;
-    left:50%;
-    transform:translateX(-50%);
-    width:160px;
-    height:230px;
-    background:linear-gradient(orange, #cc7000);
-    border-radius:50px 50px 0 0;
-    box-shadow: inset -10px 0 rgba(0,0,0,0.3);
-}
+  .card{
+    width:min(620px, 100%);
+    border-radius:28px;
+    padding:22px;
+    position:relative;
+    overflow:hidden;
 
-/* 🔘 발사 버튼 */
-#fireBtn {
-    position:absolute;
-    bottom:45px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90px;
-    height:90px;
-    background:radial-gradient(circle, gold, orange);
-    border-radius:50%;
-    border:6px solid #333;
-    cursor:pointer;
-    box-shadow:0 8px 20px rgba(0,0,0,0.6);
-    transition:0.1s;
-}
-#fireBtn:active {
-    transform:translateX(-50%) scale(0.85);
-}
+    background:linear-gradient(145deg, rgba(18,18,20,.92), rgba(0,0,0,.92));
+    border:1px solid rgba(202,167,78,.65);
+    box-shadow:
+      0 18px 60px rgba(0,0,0,.70),
+      0 0 35px rgba(255,215,0,.16),
+      inset 0 0 40px rgba(255,215,0,.08);
+  }
 
-/* 📝 입력창 */
-#inputBox {
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:rgba(255,255,255,0.95);
-    padding:25px 35px;
-    border-radius:20px;
-    box-shadow:0 15px 35px rgba(0,0,0,0.4);
-    font-size:20px;
-}
+  /* moving spotlight */
+  .card::before{
+    content:"";
+    position:absolute; inset:-40%;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,215,0,.22), transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(120,60,255,.18), transparent 42%),
+      radial-gradient(circle at 55% 55%, rgba(0,180,255,.12), transparent 45%);
+    filter: blur(18px);
+    animation: drift 9s ease-in-out infinite alternate;
+    pointer-events:none;
+  }
 
-input {
-    font-size:20px;
-    padding:5px;
-    width:90px;
+  /* subtle grain */
+  .card::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/></filter><rect width="160" height="160" filter="url(%23n)" opacity=".18"/></svg>');
+    mix-blend-mode: overlay;
+    opacity:.18;
+    pointer-events:none;
+  }
+
+  @keyframes drift{
+    0%{ transform:translate3d(-3%, -2%, 0) rotate(-2deg); }
+    100%{ transform:translate3d(3%, 2%, 0) rotate(2deg); }
+  }
+
+  /* ===== Elegant Neon Logo (상단) ===== */
+  .logo-wrap{
     text-align:center;
-}
+    margin-bottom:18px;
+    position:relative;
+    z-index:1;
+    padding:10px 0 2px;
+    border-radius:18px;
+    border:1px solid rgba(202,167,78,.45);
+    background:linear-gradient(180deg, rgba(255,215,0,.05), rgba(0,0,0,.20));
+    backdrop-filter: blur(8px);
+    overflow:hidden;
+  }
 
-button {
+  .logo-wrap::before{
+    content:"";
+    position:absolute; inset:-40% -60%;
+    background: radial-gradient(600px 120px at 30% 40%, rgba(255,215,0,.18), transparent 60%);
+    animation: sweep 3.4s linear infinite;
+    pointer-events:none;
+    opacity:.35;
+  }
+
+  @keyframes sweep{
+    0%{ transform:translateX(-20%); opacity:.20; }
+    50%{ opacity:.55; }
+    100%{ transform:translateX(20%); opacity:.20; }
+  }
+
+  .logo{
+    font-size:48px;
+    font-weight:800;
+    letter-spacing:12px;
+    color:#f5d37a;
+    animation: neonGlow 2.8s ease-in-out infinite;
+    text-shadow:
+      0 0 10px rgba(255,255,255,.35),
+      0 0 24px rgba(255,215,0,.45);
+  }
+
+  .logo-line{
+    width:140px;
+    height:2px;
+    margin:12px auto 8px;
+    background:linear-gradient(90deg, transparent, #caa74e, transparent);
+    opacity:.9;
+  }
+
+  @keyframes neonGlow{
+    0%{
+      text-shadow:
+        0 0 6px rgba(255,215,0,.35),
+        0 0 14px rgba(255,215,0,.25);
+    }
+    50%{
+      text-shadow:
+        0 0 12px rgba(255,255,255,.55),
+        0 0 26px rgba(255,215,0,.85),
+        0 0 60px rgba(255,215,0,.45);
+    }
+    100%{
+      text-shadow:
+        0 0 6px rgba(255,215,0,.35),
+        0 0 14px rgba(255,215,0,.25);
+    }
+  }
+
+  .meta{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:14px 0 6px;
+    color:rgba(245,211,122,.92);
+    font-size:16px;
+    position:relative;
+    z-index:1;
+  }
+  .points{
+    display:inline-flex;
+    align-items:baseline;
+    gap:10px;
+    padding:10px 14px;
+    border-radius:14px;
+    border:1px solid rgba(202,167,78,.45);
+    background:rgba(0,0,0,.26);
+    backdrop-filter: blur(6px);
+  }
+  .points b{
+    font-size:30px;
+    letter-spacing:1px;
+    text-shadow:0 0 18px rgba(255,215,0,.45);
+  }
+
+  .arena{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:12px;
+  }
+
+  .pane{
+    border-radius:20px;
+    padding:14px 12px 16px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(0,0,0,.28);
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 18px rgba(255,215,0,.05);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .pane .label{
+    font-size:13px;
+    letter-spacing:2px;
+    color:rgba(245,211,122,.70);
+    margin-bottom:8px;
+  }
+
+  .hand{
+    font-size:84px;
+    min-height:92px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    user-select:none;
+    text-shadow:
+      0 0 12px rgba(255,255,255,.35),
+      0 0 28px rgba(255,215,0,.55);
+    transform-origin:50% 85%;
+  }
+
+  .shake{ animation: shake .26s ease-in-out 0s 6; }
+  @keyframes shake{
+    0%{ transform: rotate(0deg) translateY(0); }
+    50%{ transform: rotate(-12deg) translateY(2px); }
+    100%{ transform: rotate(12deg) translateY(0); }
+  }
+
+  .result{
+    position:relative;
+    z-index:1;
+    margin:14px 0 12px;
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(0,0,0,.26);
+    backdrop-filter: blur(6px);
+    text-align:center;
     font-size:18px;
-    padding:8px 15px;
-    margin-left:10px;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    letter-spacing:0.5px;
+  }
+
+  .buttons{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:12px;
+    margin-top:8px;
+  }
+
+  .btn{
+    position:relative;
+    overflow:hidden;
+    border-radius:18px;
+    border:1px solid rgba(202,167,78,.55);
+    background:linear-gradient(145deg, rgba(18,18,18,.90), rgba(0,0,0,.95));
+    color:var(--gold);
+    padding:16px 10px;
+    font-size:22px;
+    font-weight:800;
     cursor:pointer;
-}
+    box-shadow:
+      0 10px 26px rgba(0,0,0,.55),
+      0 0 18px rgba(255,215,0,.14);
+    transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    touch-action: manipulation;
+  }
+
+  .btn:hover{
+    box-shadow:
+      0 14px 32px rgba(0,0,0,.58),
+      0 0 28px rgba(255,215,0,.30);
+  }
+
+  .btn:active{ transform: translateY(1px) scale(.995); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; filter:saturate(.6); }
+
+  /* neon rim */
+  .btn::before{
+    content:"";
+    position:absolute; inset:-2px;
+    background: conic-gradient(from 180deg,
+      rgba(255,215,0,.0),
+      rgba(255,215,0,.55),
+      rgba(176,70,255,.35),
+      rgba(0,180,255,.30),
+      rgba(255,215,0,.55),
+      rgba(255,215,0,.0));
+    filter: blur(10px);
+    opacity:.42;
+    pointer-events:none;
+  }
+
+  /* ripple */
+  .ripple{
+    position:absolute;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    background:radial-gradient(circle, rgba(255,215,0,.55), rgba(255,215,0,0) 60%);
+    width:12px; height:12px;
+    animation:ripple .75s ease-out forwards;
+    mix-blend-mode: screen;
+  }
+  @keyframes ripple{
+    to{ width:520px; height:520px; opacity:0; }
+  }
+
+  /* bonus overlay */
+  .bonus{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    opacity:0;
+    z-index:3;
+  }
+
+  .bonusText{
+    font-size:64px;
+    font-weight:900;
+    letter-spacing:4px;
+    padding:18px 24px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 60px rgba(0,0,0,.55);
+    transform: translateY(0) scale(1);
+  }
+
+  .bonusText.win{
+    color:#ffe08a;
+    background:rgba(30,20,0,.45);
+    text-shadow:
+      0 0 10px rgba(255,255,255,.7),
+      0 0 30px rgba(255,215,0,.95),
+      0 0 70px rgba(255,215,0,.6);
+    box-shadow:
+      0 0 26px rgba(255,215,0,.35),
+      0 20px 70px rgba(0,0,0,.60);
+  }
+  .bonusText.lose{
+    color:#ff6b6b;
+    background:rgba(30,0,0,.40);
+    text-shadow:
+      0 0 10px rgba(255,255,255,.55),
+      0 0 28px rgba(255,60,60,.90),
+      0 0 70px rgba(255,0,0,.45);
+    box-shadow:
+      0 0 26px rgba(255,60,60,.30),
+      0 20px 70px rgba(0,0,0,.60);
+  }
+
+  .bonusShow{
+    animation: bonusShow 3s ease-out forwards;
+  }
+  @keyframes bonusShow{
+    0%{ opacity:0; transform:translateY(8px) scale(.98); }
+    10%{ opacity:1; transform:translateY(0) scale(1.02); }
+    70%{ opacity:1; transform:translateY(-10px) scale(1.05); }
+    100%{ opacity:0; transform:translateY(-34px) scale(1.10); }
+  }
+
+  /* win/lose flash (soft) */
+  .flash{
+    position:absolute; inset:0;
+    pointer-events:none;
+    opacity:0;
+    z-index:2;
+    mix-blend-mode: screen;
+  }
+  .flash.win{ background:radial-gradient(circle at 50% 45%, rgba(255,215,0,.42), transparent 62%); }
+  .flash.draw{ background:radial-gradient(circle at 50% 45%, rgba(200,200,200,.24), transparent 62%); }
+  .flash.lose{ background:radial-gradient(circle at 50% 45%, rgba(255,50,50,.28), transparent 62%); }
+
+  .flashShow{ animation: flash 650ms ease-out forwards; }
+  @keyframes flash{
+    0%{ opacity:0; }
+    20%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+
+  @media (max-width: 420px){
+    .logo{ font-size:40px; letter-spacing:10px; }
+    .hand{ font-size:74px; }
+    .btn{ padding:16px 10px; font-size:22px; }
+    .bonusText{ font-size:56px; }
+  }
 </style>
 </head>
 
 <body>
-
-<div class="sky">
-    <div class="cloud" style="top:20%; width:120px; height:50px;"></div>
-    <div class="cloud" style="top:35%; width:150px; height:60px; animation-duration:80s;"></div>
-
-    <div id="numberBall">?</div>
-    <div id="countText"></div>
-
-    <div id="inputBox">
-        마지막 번호가 몇 번인가요?
-        <br><br>
-        <input type="number" id="maxNumber" min="1">
-        번
-        <button onclick="startGame()">확인</button>
+  <div class="card" id="card">
+    <!-- 상단: 서서히 빛나는 네온 로고 -->
+    <div class="logo-wrap">
+      <div class="logo">가위바위보</div>
+      <div class="logo-line"></div>
     </div>
 
-    <div id="cannon"></div>
-    <div id="fireBtn" onclick="fire()"></div>
+    <div class="meta">
+      <div class="points">현재 포인트 <b id="pointValue">1000</b> P</div>
+    </div>
 
-    <div class="hill1"></div>
-    <div class="hill2"></div>
-</div>
+    <div class="arena">
+      <div class="pane">
+        <div class="label">PLAYER</div>
+        <div class="hand" id="me">✊</div>
+      </div>
+      <div class="pane">
+        <div class="label">DEALER</div>
+        <div class="hand" id="cpu">✊</div>
+      </div>
+    </div>
+
+    <div class="result" id="result">선택하세요</div>
+
+    <div class="buttons">
+      <button class="btn" data-choice="scissors">✌️</button>
+      <button class="btn" data-choice="rock">✊</button>
+      <button class="btn" data-choice="paper">✋</button>
+    </div>
+
+    <div class="flash win" id="flashWin"></div>
+    <div class="flash draw" id="flashDraw"></div>
+    <div class="flash lose" id="flashLose"></div>
+
+    <div class="bonus" id="bonus">
+      <div class="bonusText" id="bonusText"></div>
+    </div>
+  </div>
 
 <script>
-let max = 0;
-let count = 0;
+(() => {
+  // 룰: 승 +100 / 무 -50 / 패 -100
+  let points = 1000;
 
-function startGame() {
-    max = parseInt(document.getElementById("maxNumber").value);
-    if(!max || max < 1){
-        alert("1 이상 입력하세요");
-        return;
-    }
-    document.getElementById("inputBox").style.display="none";
-    document.getElementById("countText").innerText="1 번째";
-}
+  const pointEl = document.getElementById("pointValue");
+  const meEl = document.getElementById("me");
+  const cpuEl = document.getElementById("cpu");
+  const resultEl = document.getElementById("result");
 
-function fire(){
-    if(max === 0) return;
+  const btns = [...document.querySelectorAll(".btn")];
 
-    const ball = document.getElementById("numberBall");
+  const flashWin = document.getElementById("flashWin");
+  const flashDraw = document.getElementById("flashDraw");
+  const flashLose = document.getElementById("flashLose");
 
-    ball.style.transform="translateX(-50%) scale(1.2)";
-    setTimeout(()=>{
-        ball.style.transform="translateX(-50%) scale(1)";
-    },200);
+  const bonusWrap = document.getElementById("bonus");
+  const bonusText = document.getElementById("bonusText");
 
-    let number = Math.floor(Math.random()*max)+1;
-    ball.innerText = number;
+  const choices = ["scissors","rock","paper"];
+  const emoji = { scissors:"✌️", rock:"✊", paper:"✋" };
 
-    count++;
-    document.getElementById("countText").innerText=count+" 번째";
-}
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function judge(me, cpu){
+    if(me === cpu) return "draw";
+    if(
+      (me==="scissors" && cpu==="paper") ||
+      (me==="rock" && cpu==="scissors") ||
+      (me==="paper" && cpu==="rock")
+    ) return "win";
+    return "lose";
+  }
+
+  function disable(v){ btns.forEach(b => b.disabled = v); }
+
+  function animatePoints(next){
+    const start = points;
+    const diff = next - start;
+    const frames = 46;
+    let f = 0;
+    const t = setInterval(() => {
+      f++;
+      pointEl.textContent = Math.round(start + diff*(f/frames));
+      if(f >= frames){
+        clearInterval(t);
+        pointEl.textContent = next;
+      }
+    }, 18);
+  }
+
+  function showFlash(type){
+    const el = type === "win" ? flashWin : type === "draw" ? flashDraw : flashLose;
+    el.classList.remove("flashShow");
+    void el.offsetWidth; // restart animation
+    el.classList.add("flashShow");
+  }
+
+  function showBonus(text, type){
+    bonusText.textContent = text;
+    bonusText.className = "bonusText " + type;
+
+    bonusWrap.classList.remove("bonusShow");
+    void bonusWrap.offsetWidth;
+    bonusWrap.classList.add("bonusShow");
+  }
+
+  async function countdown(){
+    meEl.textContent = "✊";
+    cpuEl.textContent = "✊";
+    meEl.classList.add("shake");
+    cpuEl.classList.add("shake");
+    resultEl.textContent = "가위 • 바위 • 보";
+    await sleep(900);
+    meEl.classList.remove("shake");
+    cpuEl.classList.remove("shake");
+  }
+
+  function addRipple(btn, x, y){
+    const r = document.createElement("span");
+    r.className = "ripple";
+    r.style.left = x + "px";
+    r.style.top = y + "px";
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 800);
+  }
+
+  btns.forEach(btn => {
+    btn.addEventListener("pointerdown", (e) => {
+      const rect = btn.getBoundingClientRect();
+      addRipple(btn, e.clientX - rect.left, e.clientY - rect.top);
+    });
+  });
+
+  btns.forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if(btn.disabled) return;
+      disable(true);
+
+      await countdown();
+
+      const me = btn.dataset.choice;
+      const cpu = choices[(Math.random()*3) | 0];
+      const r = judge(me, cpu);
+
+      meEl.textContent = emoji[me];
+      cpuEl.textContent = emoji[cpu];
+
+      let next = points;
+
+      if(r === "win"){
+        resultEl.textContent = "🎉 축하합니다! +100";
+        next = points + 100;
+        showBonus("+100", "win");
+        showFlash("win");
+      }else if(r === "draw"){
+        resultEl.textContent = "😐 비겼습니다. -50";
+        next = points - 50;
+        showBonus("-50", "lose");
+        showFlash("draw");
+      }else{
+        resultEl.textContent = "💙 아쉽네요. -100";
+        next = points - 100;
+        showBonus("-100", "lose");
+        showFlash("lose");
+      }
+
+      animatePoints(next);
+      points = next;
+
+      // 보너스가 3초 동안 보이도록(요청)
+      await sleep(3000);
+
+      disable(false);
+    });
+  });
+})();
 </script>
-
 </body>
 </html>
